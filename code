@@ -1,10 +1,13 @@
+from flask import Flask, render_template, request, redirect, url_for
 import random
 
-# Définition des couleurs et des valeurs pour les cartes Uno
+app = Flask(__name__)
+
+# Code du jeu Uno (à adapter selon vos besoins)
+
 COULEURS = ['Rouge', 'Jaune', 'Vert', 'Bleu']
 VALEURS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'Passe', 'Inverser', 'Plus 2']
 
-# Classe représentant une carte Uno
 class CarteUno:
     def __init__(self, couleur, valeur):
         self.couleur = couleur
@@ -13,7 +16,6 @@ class CarteUno:
     def __str__(self):
         return f"{self.couleur} {self.valeur}"
 
-# Classe représentant le jeu Uno
 class JeuUno:
     def __init__(self):
         self.cartes = [CarteUno(couleur, valeur) for couleur in COULEURS for valeur in VALEURS]
@@ -30,33 +32,28 @@ class JeuUno:
         self.joueur1_main = [self.piocher_carte() for _ in range(7)]
         self.joueur2_main = [self.piocher_carte() for _ in range(7)]
 
-    def afficher_main(self, joueur_main):
-        print("Cartes dans la main :")
-        for i, carte in enumerate(joueur_main, start=1):
-            print(f"{i}. {carte}")
-
     def jouer(self, joueur_main, carte):
         if carte.couleur == self.carte_actuelle.couleur or carte.valeur == self.carte_actuelle.valeur:
             self.carte_actuelle = carte
             joueur_main.remove(carte)
-            print("Carte jouée avec succès!")
+            return True
         else:
-            print("Carte invalide. Choisissez une autre carte.")
+            return False
 
-# Exemple d'utilisation
 jeu_uno = JeuUno()
-jeu_uno.distribuer_cartes()
 
-while True:
-    jeu_uno.afficher_main(jeu_uno.joueur1_main)
-    numero_carte = int(input("Choisissez le numéro de la carte à jouer (ou 0 pour piocher) : "))
+@app.route('/')
+def index():
+    return render_template('index.html', main_hand=jeu_uno.joueur1_main)
 
-    if numero_carte == 0:
-        carte_piochee = jeu_uno.piocher_carte()
-        jeu_uno.joueur1_main.append(carte_piochee)
-        print(f"Vous avez pioché : {carte_piochee}")
-    elif 1 <= numero_carte <= len(jeu_uno.joueur1_main):
-        carte_jouee = jeu_uno.joueur1_main[numero_carte - 1]
-        jeu_uno.jouer(jeu_uno.joueur1_main, carte_jouee)
+@app.route('/jouer_carte', methods=['POST'])
+def jouer_carte():
+    carte_index = int(request.form['carte_index'])
+    carte_jouee = jeu_uno.joueur1_main[carte_index]
+    if jeu_uno.jouer(jeu_uno.joueur1_main, carte_jouee):
+        return redirect(url_for('index'))
     else:
-        print("Numéro de carte invalide. Veuillez réessayer.")
+        return "Carte invalide. Choisissez une autre carte."
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
