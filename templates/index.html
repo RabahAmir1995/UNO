@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jeu Uno</title>
+</head>
+<body>
+    <h1>Jeu Uno</h1>
+    <h2>Main du Joueur 1</h2>
+    <ul>
+        {% for carte in main_hand %}
+            <li>{{ carte }}</li>
+        {% endfor %}
+    </ul>
+    <form action="/jouer_carte" method="post">
+        <label for="carte_index">Choisissez le numéro de la carte à jouer:</label>
+        <input type="number" name="carte_index" required>
+        <input type="submit" value="Jouer">
+    </form>
+</body>
+</html>
